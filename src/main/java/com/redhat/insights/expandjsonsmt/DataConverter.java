@@ -35,7 +35,7 @@ class DataConverter {
         struct.put(field, obj);
     }
 
-    private static Object bsonValue2Object(BsonValue value, Schema schema) {
+    public static Object bsonValue2Object(BsonValue value, Schema schema) {
         switch (value.getBsonType()) {
         case STRING:
             return value.asString().getValue();

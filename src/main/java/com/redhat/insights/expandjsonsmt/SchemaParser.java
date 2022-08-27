@@ -50,7 +50,7 @@ class SchemaParser {
         }
     }
 
-    private static Schema bsonValue2Schema(BsonValue bsonValue) {
+    public static Schema bsonValue2Schema(BsonValue bsonValue) {
         switch (bsonValue.getBsonType()) {
         case NULL:
         case STRING:
