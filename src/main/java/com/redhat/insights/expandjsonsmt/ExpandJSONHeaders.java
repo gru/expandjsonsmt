@@ -36,7 +36,7 @@ import java.util.Map;
 import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
 /**
- * Main project class implementing JSON string transformation.
+ * Main project class implementing JSON string to headers transformation.
  */
 abstract class ExpandJSONHeaders<R extends ConnectRecord<R>> implements Transformation<R> {
 
@@ -50,7 +50,7 @@ abstract class ExpandJSONHeaders<R extends ConnectRecord<R>> implements Transfor
             .define(ConfigName.SOURCE_FIELD, ConfigDef.Type.STRING, "headers", ConfigDef.Importance.MEDIUM,
                     "Source field name. This field will be expanded to headers.");
 
-    private static final String PURPOSE = "json field expansion";
+    private static final String PURPOSE = "json field to headers expansion";
 
     private String sourceField;
 
@@ -74,7 +74,7 @@ abstract class ExpandJSONHeaders<R extends ConnectRecord<R>> implements Transfor
         try {
             Object recordValue = operatingValue(record);
             if (recordValue == null) {
-                LOGGER.info("ExpandJSON record is null");
+                LOGGER.info("ExpandJSONHeaders record is null");
                 LOGGER.info(record.toString());
                 return record;
             }
@@ -84,7 +84,7 @@ abstract class ExpandJSONHeaders<R extends ConnectRecord<R>> implements Transfor
             final BsonDocument document = parseJsonField(value, sourceField, delimiterSplit);
 
             if (document == null) {
-                LOGGER.info(String.format("ExpandJSON '%s' value is null", sourceField));
+                LOGGER.info(String.format("ExpandJSONHeaders '%s' value is null", sourceField));
                 LOGGER.info(record.toString());
                 return record;
             }
@@ -101,17 +101,17 @@ abstract class ExpandJSONHeaders<R extends ConnectRecord<R>> implements Transfor
                         final SchemaAndValue literalValue = new SchemaAndValue(headerSchema, headerValue);
                         updatedHeaders.add(documentKey, literalValue);
                     } else {
-                        LOGGER.warn(String.format("ExpandJSON unable to get header value: '%s' : '%s'", documentKey, documentValue));
+                        LOGGER.warn(String.format("ExpandJSONHeaders unable to get header value: '%s' : '%s'", documentKey, documentValue));
                     }
                 } else {
-                    LOGGER.warn(String.format("ExpandJSON unable to get header schema: '%s' : '%s'", documentKey, documentValue));
+                    LOGGER.warn(String.format("ExpandJSONHeaders unable to get header schema: '%s' : '%s'", documentKey, documentValue));
                 }
             }
 
             return record.newRecord(record.topic(), record.kafkaPartition(), record.keySchema(), record.key(),
                     record.valueSchema(), record.value(), record.timestamp(), updatedHeaders);
         } catch (DataException e) {
-            LOGGER.warn("ExpandJSON fields missing from record: " + record.toString(), e);
+            LOGGER.warn("ExpandJSONHeaders fields missing from record: " + record.toString(), e);
             return record;
         }
     }
