@@ -25,11 +25,14 @@ import org.apache.kafka.connect.transforms.util.SimpleConfig;
 import org.apache.kafka.connect.errors.DataException;
 
 import org.bson.BsonDocument;
+import org.bson.BsonType;
 import org.bson.BsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -98,8 +101,19 @@ abstract class ExpandJSONHeaders<R extends ConnectRecord<R>> implements Transfor
                 if (headerSchema != null) {
                     final Object headerValue = DataConverter.bsonValue2Object(documentValue, headerSchema);
                     if (headerValue != null) {
-                        final SchemaAndValue literalValue = new SchemaAndValue(headerSchema, headerValue);
-                        updatedHeaders.add(documentKey, literalValue);
+                        if (documentValue.getBsonType() == BsonType.STRING) {
+                            final byte[] decodedBase64HeaderValue = Base64.getDecoder().decode((String)headerValue);
+                            if (decodedBase64HeaderValue != null) {
+                                final String stringHeaderValue = new String(decodedBase64HeaderValue, StandardCharsets.UTF_8);
+                                final SchemaAndValue literalValue = new SchemaAndValue(headerSchema, stringHeaderValue);
+                                updatedHeaders.add(documentKey, literalValue);
+                            } else {
+                                LOGGER.warn(String.format("ExpandJSONHeaders unable to decode header Base64 value: '%s' : '%s'", documentKey, documentValue));
+                            }
+                        } else {
+                            final SchemaAndValue literalValue = new SchemaAndValue(headerSchema, headerValue);
+                            updatedHeaders.add(documentKey, literalValue);
+                        }
                     } else {
                         LOGGER.warn(String.format("ExpandJSONHeaders unable to get header value: '%s' : '%s'", documentKey, documentValue));
                     }

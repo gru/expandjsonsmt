@@ -62,14 +62,14 @@ public class ExpandJSONHeadersTest {
                 .build();
 
         final Struct value = new Struct(schema);
-        value.put("headers","{\"stringValue\":\"Moskwa\",\"numberValue\":123}");
+        value.put("headers","{\"stringValue\":\"TW9zY293\",\"numberValue\":123}");
 
         final SinkRecord record = new SinkRecord("test", 0, null, null, schema, value, 0);
         final SinkRecord transformedRecord = xform.apply(record);
 
         final Headers updatedHeaders = transformedRecord.headers();
         assertEquals(2, updatedHeaders.size());
-        assertEquals("Moskwa", updatedHeaders.lastWithName("stringValue").value());
+        assertEquals("Moscow", updatedHeaders.lastWithName("stringValue").value());
         assertEquals(123, updatedHeaders.lastWithName("numberValue").value());
     }
 
@@ -111,14 +111,14 @@ public class ExpandJSONHeadersTest {
         value.put("name", "Josef");
         value.put("age", 42);
         value.put("headers",
-                "{\"stringValue\":\"Moskwa\",\"numberValue\":123,\"complex\": { \"valueA\": 1, \"valueB\": 2 }}");
+                "{\"stringValue\":\"TW9zY293\",\"numberValue\":123,\"complex\": { \"valueA\": 1, \"valueB\": 2 }}");
 
         final SinkRecord record = new SinkRecord("test", 0, null, null, schema, value, 0);
         final SinkRecord transformedRecord = xform.apply(record);
 
         final Headers updatedHeaders = transformedRecord.headers();
         assertEquals(3, updatedHeaders.size());
-        assertEquals("Moskwa", updatedHeaders.lastWithName("stringValue").value());
+        assertEquals("Moscow", updatedHeaders.lastWithName("stringValue").value());
         assertEquals(123, updatedHeaders.lastWithName("numberValue").value());
         assertEquals("Struct{valueA=1,valueB=2}", updatedHeaders.lastWithName("complex").value().toString());
     }
